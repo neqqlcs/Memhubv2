@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background: rgb(0,0,0);
+            background: linear-gradient(135deg, rgba(0,0,0,1) 20%, rgba(255,128,0,1) 50%, rgba(0,0,0,1) 80%); 
+            font-family: Helvetica;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .login-container, .main-container {
+            display: none;
+        }
+
+        .login-container.active, .main-container.active {
+            display: flex;
+        }
+
+        .login-container {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .main-container {
+            flex-direction: column;
+            align-items: center;
+            width: 100%;
+        }
+
+        #pointsContainer {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            font-size: 18px;
+        }
+
+        h1 {
+            font-family: Verdana, Geneva, Tahoma, sans-serif;
+            font-size: 2em;
+            margin-bottom: 50px;
+            font-weight: bold; 
+            background-color: rgb(24, 24, 24); 
+            padding: 10px 50px; 
+            border-radius: 10px; 
+            text-align: center; 
+            color: White;
+            margin-top: 5px; 
+        }
+
+        p {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 1.5em;
+            color: white;
+            text-align: center;
+        }
+
+        canvas {
+            border: 1px solid #000;
+            background-color: #fff;
+            width: 100%;
+            height: 100%;
+        }
+
+        .hub {
+            color: black; 
+            background-color: rgb(255, 165, 0); 
+        }
+
+        .image-container {
+            margin-top: 100px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 535px;
+            text-align: center;
+        }
+
+        .reveal-button {
+            margin-top: 30px; 
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .login-form {
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .login-form input {
+            margin-bottom: 10px;
+        }
+
+        .logout-button-container {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        .register-button {
+            margin-top: 20px;
+        }
+
+    </style>
+</head>
+<body>
+
+    <div id="pointsContainer" class="hidden">Points: <span id="points">0</span></div>
+
+    <div class="logout-button-container">
+        <button id="logoutButton" class="btn btn-danger">Logout</button>
+    </div>
+
+    <div class="login-container active" id="loginContainer">
+        <h1>Login</h1>
+        <form id="loginForm" class="login-form">
+            <div class="form-group">
+                <label for="username">Username</label>
+                <input type="text" id="username" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Login</button>
+            <button id="showRegisterButton" class="btn btn-secondary">Register</button>
+        </form>
+    </div>
+
+    <div class="login-container" id="registerContainer">
+        <h1>Register</h1>
+        <form id="registerForm" class="login-form">
+            <div class="form-group">
+                <label for="regUsername">Username</label>
+                <input type="text" id="regUsername" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label for="regPassword">Password</label>
+                <input type="password" id="regPassword" class="form-control" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Register</button>
+            <button id="backButton" class="btn btn-secondary">Back</button>
+        </form>
+    </div>
+
+    <div class="admin-container hidden" id="adminPanel">
+        <h1>Admin Panel</h1>
+        <div id="userList">
+            <!-- User list will be displayed here -->
+        </div>
+        <button id="deleteAllUsersButton" class="btn btn-danger mt-3">Delete All Users</button>
+    </div>
+    
+
+    <div class="main-container" id="mainContainer">
+        <p>Are you familiar with your brand logos? Try to draw from memory!</p>
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6 d-flex flex-column align-items-center">
+                    <h1>Memory <span class="hub">Hub</span></h1>
+                    <p id="imageTitle">Text 1</p>
+                    <canvas id="canvas"></canvas>
+                    <div class="d-flex justify-content-center mt-3">
+                        <div class="mr-5">
+                            <label for="colorDropdown" style="color: rgb(0, 0, 0);">Color:</label>
+                        </div>
+                        <div>
+                            <select id="colorDropdown" class="form-control" style="width: 100px; background-color: #66707A; font-size: 15px; color:#fff; border-color: #66707A;">
+                                <option value="black" style="color: black;">Black</option>
+                                <option value="red" style="color: red;">Red</option>
+                                <option value="orange" style="color: orange;">Orange</option>
+                                <option value="yellow" style="color: yellow;">Yellow</option>
+                                <option value="green" style="color: green;">Green</option>
+                                <option value="blue" style="color: blue;">Blue</option>
+                                <option value="purple" style="color: purple;">Purple</option>
+                                <option value="white" style="color: white;">White</option>
+                            </select>
+                        </div>
+                    </div>                
+                    <div class="d-flex justify-content-center mt-3">
+                        <div class="mr-3">
+                            <label for="thicknessDropdown" style="color: rgb(0, 0, 0);">Thickness:</label>
+                        </div>
+                        <div>
+                            <select id="thicknessDropdown" class="form-control" style="width: 100px; background-color: #66707A; font-size: 15px; color:#fff; border-color: #66707A;">
+                                <option value="1">1</option>
+                                <option value="3">3</option>
+                                <option value="6">6</option>
+                                <option value="9">9</option>
+                                <option value="12">12</option>
+                                <option value="15">15</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="d-flex justify-content-center mt-3">
+                        <button class="btn btn-secondary mr-2 clear-button">Clear</button>
+                        <button class="btn btn-secondary mr-2 previous-button">Previous</button>
+                        <button class="btn btn-secondary next-button">Next</button>
+                    </div>
+                </div>
+                <div class="col-md-6 d-flex flex-column align-items-center">
+                    <div class="image-container">
+                        <img id="image" src="" alt="Logo" class="img-fluid" style="display: none;">
+                        <button id="revealButton" class="btn btn-primary reveal-button">Reveal Image</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS and dependencies -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Your custom JavaScript -->
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const colorDropdown = document.getElementById('colorDropdown');
+        const thicknessDropdown = document.getElementById('thicknessDropdown');
+        const clearButton = document.querySelector('.clear-button');
+        const nextButton = document.querySelector('.next-button');
+        const previousButton = document.querySelector('.previous-button');
+
+        let isDrawing = false;
+        let currentColor = '#000'; // Default color
+        let currentThickness = 1; // Default thickness
+        let currentImageIndex = 0; // Initial image index
+        let startDrawTime;
+        let points = 0;
+        
+        const images = ["Amazon.jpg",
+                        "Android.png",
+                        "Andoks.jpg",
+                        "BearBrand.jpg",
+                        "Bench.png",
+                        "Chowkeng.jpg",
+                        "DatuPuti.png", 
+                        "Gcash.jpg",
+                        "Google.jpg",
+                        "Goldilocks.jpg",
+                        "Jabi.png",
+                        "MangInasal.jpeg",
+                        "McDonalds.jpg", 
+                        "Metrobank.jpg",
+                        "MMSU.png",
+                        "Nike.jpg",
+                        "Paymaya.jpg",
+                        "Pepsi.jpg",
+                        "Petron.jpg", 
+                        "SM.jpg",
+                        "Snapchat.jpg",
+                        "Spotify.jpg",
+                        "RedHorse.jpg",
+                        "Rob.jpg",
+                        "Rombab.jpg",
+                        "SanMig.png", 
+                    ]; 
+        const imageTexts = ["Draw The Amazon Logo",
+                            "Draw The Android Logo",
+                            "Draw The Andoks Logo",
+                            "Draw The Bear Brand Logo",
+                            "Draw The Bench Logo",
+                            "Draw The Chowking Logo",
+                            "Draw The Datu Puti Logo",
+                            "Draw The Gcash Logo",
+                            "Draw The Google Logo",
+                            "Draw The Goldilocks Logo",
+                            "Draw The Jollibee Logo",
+                            "Draw The Mang Inasal Logo",
+                            "Draw The McDonalds Logo",
+                            "Draw The Metrobank Logo",
+                            "MMSU dear...",
+                            "Draw The Nike Logo",
+                            "Draw The PayMaya Logo",
+                            "Draw The Pepsi Logo",
+                            "Draw The Petron Logo",
+                            "Draw The SM Logo",
+                            "Draw The Snapchat Logo",
+                            "Draw The Spotify Logo",
+                            "Draw The Red Horse Logo",
+                            "Draw The Robinsons Logo",
+                            "Draw The Romantic Baboy Logo",
+                            "Draw The San Miguel Corp Logo"
+                        ];
+
+        // Set up canvas
+        canvas.width = canvas.clientWidth;
+        canvas.height = 400;
+
+        // Event listener for color dropdown
+        colorDropdown.addEventListener('change', (event) => {
+            currentColor = event.target.value;
+        });
+
+        // Event listener for thickness dropdown
+        thicknessDropdown.addEventListener('change', (event) => {
+            currentThickness = parseInt(event.target.value);
+        });
+
+        // Event listener for clearing the canvas
+        clearButton.addEventListener('click', () => {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        });
+
+        // Function to update points display
+        function updatePointsDisplay() {
+            document.getElementById('points').textContent = points;
+        }
+
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        function hideImage() {
+            image.style.display = 'none';
+            revealButton.style.display = 'block'; // Show the reveal button
+        }
+
+        // Initial load of the first image
+        loadImage(images[currentImageIndex], imageTexts[currentImageIndex]);
+
+        // Event listener for next button
+        nextButton.addEventListener('click', () => {
+            currentImageIndex++;
+            if (currentImageIndex >= images.length) {
+                currentImageIndex = 0; // Loop back to the first image
+            }
+            loadImage(images[currentImageIndex], imageTexts[currentImageIndex]); // Update the text
+            clearCanvas();
+            hideImage();
+        });
+
+        // Event listener for previous button
+        previousButton.addEventListener('click', () => {
+            currentImageIndex--;
+            if (currentImageIndex < 0) {
+                currentImageIndex = images.length - 1; // Loop back to the last image
+            }
+            loadImage(images[currentImageIndex], imageTexts[currentImageIndex]); // Update the text
+            clearCanvas();
+            hideImage();
+        });
+
+        // Function to load an image and update the text
+        function loadImage(imagePath, text) {
+            const imageElement = document.getElementById('image');
+            const imageTitleElement = document.getElementById('imageTitle'); // Get the paragraph element
+            imageElement.onload = function() {
+                // Update the image source
+                imageElement.src = imagePath;
+            };
+            imageElement.src = imagePath;
+            imageTitleElement.textContent = text; // Update the text content
+        }
+
+        // Helper function to get coordinates
+        function getEventCoordinates(e) {
+            const rect = canvas.getBoundingClientRect();
+            if (e.touches && e.touches.length > 0) {
+                return {
+                    x: e.touches[0].clientX - rect.left,
+                    y: e.touches[0].clientY - rect.top
+                };
+            } else {
+                return {
+                    x: e.clientX - rect.left,
+                    y: e.clientY - rect.top
+                };
+            }
+        }
+    
+        // Function to update and store points
+        function updateAndStorePoints(points) {
+            const username = document.getElementById('username').value.toLowerCase(); // Get the current username
+            localStorage.setItem(`${username}_points`, points); // Store the updated points in local storage
+        }
+
+        // Function to retrieve points from local storage
+        function retrievePoints() {
+            const username = document.getElementById('username').value.toLowerCase(); // Get the current username
+            const storedPoints = localStorage.getItem(`${username}_points`);
+            if (storedPoints !== null) {
+                points = parseInt(storedPoints); // Parse stored points to integer
+                updatePointsDisplay(); // Update points display
+            }
+        }
+
+        // Function to handle drawing completion and points calculation
+        function handleDrawingCompletion() {
+            // Calculate points and update display
+            const endTime = new Date().getTime();
+            const duration = endTime - startDrawTime;
+            points += duration;
+            updatePointsDisplay();
+            
+            // Store updated points in local storage
+            updateAndStorePoints(points);
+
+            // Retrieve points from local storage after each drawing
+            retrievePoints();
+        }
+
+
+
+        // Call retrievePoints function when the page loads
+        window.addEventListener('load', retrievePoints);
+
+        // Event listeners for drawing
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+
+        // Event listeners for touch events
+        canvas.addEventListener('touchstart', startDrawing);
+        canvas.addEventListener('touchmove', draw);
+        canvas.addEventListener('touchend', stopDrawing);
+
+        function startDrawing(e) {
+            startDrawTime = new Date().getTime();
+            isDrawing = true;
+            const { x, y } = getEventCoordinates(e);
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            draw(e); // Draw initial point
+        }
+
+        function draw(e) {
+            if (!isDrawing) return;
+            if (!startDrawTime) {
+                startDrawing(e); // Start timing if not already started
+            }
+            if (!isDrawing) return;
+            const { x, y } = getEventCoordinates(e);
+            ctx.strokeStyle = currentColor;
+            ctx.lineWidth = currentThickness;
+            ctx.lineCap = 'round';
+            ctx.lineTo(x, y);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            e.preventDefault(); // Prevent scrolling on touch devices
+        }
+
+        function stopDrawing() {
+            if (startDrawTime) {
+                const endTime = new Date().getTime(); // Get the current time in milliseconds
+                const duration = endTime - startDrawTime; // Calculate the duration of drawing in milliseconds
+                points += duration; // Increase points based on duration
+                updatePointsDisplay(); // Update points display
+                updateAndStorePoints(points); // Update and store the points in local storage
+            }
+            startDrawTime = null; // Reset startDrawTime
+            isDrawing = false;
+            ctx.beginPath();
+        }
+
+    
+        const revealButton = document.getElementById('revealButton');
+        const image = document.getElementById('image');
+    
+        // Event listener for reveal button
+        revealButton.addEventListener('click', () => {
+            image.style.display = 'block'; // Show the image
+            revealButton.style.display = 'none'; // Hide the reveal button
+        });
+
+        document.querySelector('.logout-button-container').classList.add('hidden');
+        
+    
+        // JavaScript for handling login form submission
+        loginForm.addEventListener('submit', (event) => {
+        event.preventDefault();
+        const username = document.getElementById('username').value.toLowerCase(); // Convert to lowercase
+        const password = document.getElementById('password').value;
+
+        // Check if the entered username and password are "admin"
+        if (username === 'admin' && password === 'admin') {
+            // Display the admin panel
+            loginContainer.classList.remove('active');
+            adminPanel.classList.remove('hidden'); // Show the admin panel
+            document.querySelector('.logout-button-container').classList.remove('hidden'); // Show the logout button
+            return;
+        }
+
+        // Check if the username exists in local storage
+        if (localStorage.getItem(username) === null) {
+            alert('Username not found. Please register or check your username.');
+            return;
+        }
+
+        // Retrieve the password associated with the username
+        const storedPassword = localStorage.getItem(username);
+
+        // Check if the entered password matches the stored password
+        if (password !== storedPassword) {
+            alert('Incorrect password. Please try again.');
+            return;
+        }
+
+        // Successful login for non-admin user
+        loginContainer.classList.remove('active');
+        mainContainer.classList.add('active');
+        document.querySelector('.logout-button-container').classList.remove('hidden'); // Show the logout button
+
+        // Make the points container visible
+        document.getElementById('pointsContainer').classList.remove('hidden');
+
+        // Retrieve user's points from storage or set to 0 if not found
+        let userPoints = localStorage.getItem(`${username}_points`);
+        if (userPoints === null) {
+            userPoints = 0;
+        } else {
+            userPoints = parseInt(userPoints); // Parse points to integer
+        }
+
+        // Update points display with user's points
+        document.getElementById('points').textContent = userPoints;
+
+        // Call retrievePoints function to update points
+        retrievePoints();
+
+
+        // Reinitialize canvas dimensions
+        canvas.width = canvas.clientWidth;
+        canvas.height = 400;
+
+        // Load the first image
+        loadImage(images[currentImageIndex], imageTexts[currentImageIndex]);
+
+        });
+
+        document.querySelector('.logout-button-container button').addEventListener('click', () => {
+        // Hide the main container and show the login container
+        mainContainer.classList.remove('active');
+        loginContainer.classList.add('active');
+        
+        // Hide the admin panel if it is visible
+        adminPanel.classList.add('hidden');
+        
+        // Hide the logout button
+        document.querySelector('.logout-button-container').classList.add('hidden');
+        
+        // Save user's points to storage
+        const username = document.getElementById('username').value.toLowerCase(); // Convert to lowercase
+        const userPoints = parseInt(document.getElementById('points').textContent);
+        localStorage.setItem(`${username}_points`, userPoints);
+
+        // Clear the input fields
+        document.getElementById('username').value = '';
+        document.getElementById('password').value = '';
+        });
+
+
+
+        document.getElementById('pointsContainer').classList.add('hidden'); // Hide the points container initially
+
+        // JavaScript for handling logout button click
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            // Hide the admin panel and show the login container
+            adminPanel.classList.add('hidden');
+            loginContainer.classList.add('active');
+            document.querySelector('.logout-button-container').classList.add('hidden'); // Hide the logout button
+
+            // Hide the main container (drawing game)
+            mainContainer.classList.remove('active');
+
+            // Optionally, clear the login form
+            loginForm.reset();
+
+            // Clear the canvas
+            clearCanvas();
+
+            // Hide the points container
+            document.getElementById('pointsContainer').classList.add('hidden');
+
+            // Save user's points to storage
+            const loggedInUser = sessionStorage.getItem('loggedInUser');
+            if (loggedInUser) {
+                const userPoints = parseInt(document.getElementById('points').textContent);
+                localStorage.setItem(`${loggedInUser}_points`, userPoints);
+            }
+
+            // Clear the session storage
+            // sessionStorage.removeItem('loggedInUser');
+
+            updateAndStorePoints(points);
+        });
+
+
+
+        // Function to clear the canvas
+        function clearCanvas() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+        }
+
+        // JavaScript for handling delete all users button click
+        document.getElementById('deleteAllUsersButton').addEventListener('click', () => {
+            const confirmDeleteAll = confirm('Are you sure you want to delete all users? This action cannot be undone.');
+            if (confirmDeleteAll) {
+                localStorage.clear(); // Clear all users from local storage
+                displayUsers(); // Update user list after deletion
+            }
+        });
+
+        // JavaScript for handling register button click
+        document.getElementById('showRegisterButton').addEventListener('click', () => {
+            // Show the registration form and hide the login form
+            document.getElementById('loginContainer').classList.remove('active');
+            document.getElementById('registerContainer').classList.add('active');
+        });
+
+        // JavaScript for handling register form submission
+        registerForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const regUsername = document.getElementById('regUsername').value;
+            const regPassword = document.getElementById('regPassword').value;
+
+            // Validate the input fields
+            if (regUsername.trim() === '' || regPassword.trim() === '') {
+                alert('Please enter both username and password.');
+                return;
+            }
+
+            // Check if the username is already taken (you can customize this check)
+            if (localStorage.getItem(regUsername) !== null) {
+                alert('Username already exists. Please choose a different username.');
+                return;
+            }
+
+            // Store the registration information in local storage
+            localStorage.setItem(regUsername, regPassword);
+
+            // Notify the user about successful registration
+            alert('Registration successful! You can now login with your new account.');
+            registerForm.reset(); // Optionally clear the registration form fields
+
+            // Automatically switch back to the login form after registration
+            document.getElementById('registerContainer').classList.remove('active');
+            document.getElementById('loginContainer').classList.add('active');
+        });
+
+        const showRegisterButton = document.getElementById('showRegisterButton');
+        const backButton = document.getElementById('backButton');
+
+        showRegisterButton.addEventListener('click', () => {
+            loginContainer.classList.remove('active');
+            registerContainer.classList.add('active');
+        });
+
+        backButton.addEventListener('click', () => {
+            registerContainer.classList.remove('active');
+            loginContainer.classList.add('active');
+        });
+
+        // Function to display existing users
+        // Function to display existing users
+        function displayUsers() {
+            const userList = document.getElementById('userList');
+            userList.innerHTML = ''; // Clear existing list
+
+            // Loop through all users in local storage and display them
+            for (let i = 0; i < localStorage.length; i++) {
+                const username = localStorage.key(i);
+                if (username.includes('_points')) continue; // Skip entries for points
+                const userPoints = localStorage.getItem(`${username}_points`) || 0; // Get user's points or default to 0
+                const userItem = document.createElement('div');
+                userItem.innerHTML = `
+                    <p><strong>Username:</strong> ${username}</p>
+                    <p><strong>Password:</strong> ${localStorage.getItem(username)}</p>
+                    <p><strong>Points:</strong> ${userPoints}</p>
+                    <button class="btn btn-warning" onclick="editUser('${username}')">Edit</button>
+                    <button class="btn btn-danger" onclick="deleteUser('${username}')">Delete</button>
+                `;
+                userList.appendChild(userItem);
+            }
+        }
+
+
+        // Call displayUsers function to initially display existing users
+        displayUsers();
+
+        // JavaScript for handling adding new user form submission
+        const addUserForm = document.getElementById('addUserForm');
+        addUserForm.addEventListener('submit', (event) => {
+            event.preventDefault();
+            const newUsername = document.getElementById('newUsername').value.toLowerCase(); // Convert to lowercase
+            const newPassword = document.getElementById('newPassword').value;
+
+            // Check if the username already exists
+            if (localStorage.getItem(newUsername) !== null) {
+                alert('Username already exists. Please choose a different username.');
+                return;
+            }
+
+            // Store the new user in local storage
+            localStorage.setItem(newUsername, newPassword);
+
+            // Display updated list of users
+            displayUsers();
+
+            // Reset the form fields
+            addUserForm.reset();
+        });
+
+        // Function to edit user
+        function editUser(username) {
+            const newPassword = prompt(`Enter new password for ${username}:`);
+            if (newPassword !== null) {
+                localStorage.setItem(username, newPassword);
+                displayUsers(); // Update user list after editing
+            }
+        }
+
+        // Function to delete user
+        function deleteUser(username) {
+            const confirmDelete = confirm(`Are you sure you want to delete the user ${username}?`);
+            if (confirmDelete) {
+                localStorage.removeItem(username);
+                displayUsers(); // Update user list after deletion
+            }
+        }
+
+        // JavaScript for handling delete all users button click
+        document.getElementById('deleteAllUsersButton').addEventListener('click', () => {
+            const confirmDeleteAll = confirm('Are you sure you want to delete all users? This action cannot be undone.');
+            if (confirmDeleteAll) {
+                localStorage.clear(); // Clear all users from local storage
+                displayUsers(); // Update user list after deletion
+            }
+        });
+
+    </script>
+</body>
+</html>
+
